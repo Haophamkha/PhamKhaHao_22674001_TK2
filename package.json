@@ -10,6 +10,7 @@
     "deploy": "npx expo export -p web && npx eas-cli@latest deploy"
   },
   "dependencies": {
+    "date-fns": "^4.1.0",
     "expo": "^54.0.1",
     "expo-constants": "~18.0.8",
     "expo-linking": "~8.0.7",
