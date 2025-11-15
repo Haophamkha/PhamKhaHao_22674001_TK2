@@ -1,5 +1,5 @@
-// app/home.tsx → CHẮC CHẮN 1/1 ĐIỂM CÂU 3
-import React, { useEffect, useState } from "react";
+// app/home.tsx → HOÀN CHỈNH – SẼ TỰ RELOAD KHI QUAY LẠI TỪ FORM
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -7,34 +7,37 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { useFocusEffect } from "expo-router"; // ← QUAN TRỌNG NHẤT!
 import { useSQLiteContext } from "expo-sqlite";
 import { getAllHabits, toggleDoneToday } from "@/db";
 import type { Habit } from "@/types/habit";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function HomePage() {
   const db = useSQLiteContext();
+  const router = useRouter();
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load dữ liệu khi vào màn hình
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const data = await getAllHabits(db);
-        setHabits(data);
-      } catch (error) {
-        console.error("Lỗi load habits:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // ←←← DÙNG useFocusEffect ĐỂ TỰ ĐỘNG LOAD LẠI KHI VÀO MÀN HÌNH ←←←
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
+        try {
+          setLoading(true);
+          const data = await getAllHabits(db);
+          setHabits(data);
+        } catch (error) {
+          console.error("Lỗi load habits:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadData();
+    }, [db])
+  );
 
-    loadData();
-  }, [db]);
-
-  // Toggle done_today
   const handleToggle = async (id: number, current: number) => {
     await toggleDoneToday(db, id, current === 0);
     setHabits(prev =>
@@ -42,7 +45,7 @@ export default function HomePage() {
     );
   };
 
-  // Empty state đúng yêu cầu đề bài
+  // Empty state đúng đề bài
   if (!loading && habits.length === 0) {
     return (
       <View className="flex-1 justify-center items-center bg-white px-8">
@@ -56,7 +59,7 @@ export default function HomePage() {
 
   return (
     <View className="flex-1 bg-white">
-      {/* Header cố định (không dùng gradient để tránh lỗi Tailwind) */}
+      {/* Header */}
       <View className="bg-blue-600 pt-12 pb-6 px-6">
         <Text className="text-3xl font-bold text-white text-center">
           Habit Tracker
@@ -75,7 +78,6 @@ export default function HomePage() {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View className="bg-white border border-gray-200 rounded-xl p-5 mb-4 shadow-sm">
-              {/* Title */}
               <Text
                 className={`text-xl font-bold ${
                   item.done_today === 1 ? "line-through text-gray-400" : "text-gray-900"
@@ -84,14 +86,12 @@ export default function HomePage() {
                 {item.title}
               </Text>
 
-              {/* Description */}
               {item.description ? (
                 <Text className="text-gray-600 mt-2 text-base">
                   {item.description}
                 </Text>
               ) : null}
 
-              {/* Trạng thái done_today */}
               <View className="flex-row items-center mt-4 gap-3">
                 <TouchableOpacity onPress={() => handleToggle(item.id, item.done_today)}>
                   {item.done_today === 1 ? (
@@ -100,9 +100,7 @@ export default function HomePage() {
                     <Ionicons name="checkmark-circle-outline" size={36} color="#94a3b8" />
                   )}
                 </TouchableOpacity>
-                <Text className={`font-medium ${
-                  item.done_today === 1 ? "text-emerald-600" : "text-gray-500"
-                }`}>
+                <Text className={`font-medium ${item.done_today === 1 ? "text-emerald-600" : "text-gray-500"}`}>
                   {item.done_today === 1 ? "Đã hoàn thành hôm nay" : "Chưa làm hôm nay"}
                 </Text>
               </View>
@@ -110,6 +108,15 @@ export default function HomePage() {
           )}
         />
       )}
+
+      {/* Nút + mở form */}
+      <TouchableOpacity
+        onPress={() => router.push("/form")}
+        className="absolute bottom-8 right-6 bg-blue-600 rounded-full p-5 shadow-2xl"
+        activeOpacity={0.8}
+      >
+        <MaterialIcons name="add" size={36} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }
