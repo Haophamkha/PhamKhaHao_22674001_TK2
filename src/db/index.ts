@@ -54,9 +54,11 @@ export const createHabit = async (
 };
 
 // READ
+// src/database.ts → SỬA DÒNG NÀY
 export const getAllHabits = async (db: SQLiteDatabase): Promise<Habit[]> => {
+  // BỎ WHERE active = 1 → lấy hết để filter ở frontend
   return await db.getAllAsync<Habit>(
-    `SELECT * FROM habits WHERE active = 1 ORDER BY created_at DESC`
+    `SELECT * FROM habits ORDER BY created_at DESC`
   );
 };
 
