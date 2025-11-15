@@ -1,4 +1,4 @@
-// app/home.tsx → HOÀN CHỈNH – SẼ TỰ RELOAD KHI QUAY LẠI TỪ FORM
+
 import React, { useCallback, useState } from "react";
 import {
   View,
@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { useFocusEffect } from "expo-router"; // ← QUAN TRỌNG NHẤT!
+import { useFocusEffect } from "expo-router"; 
 import { useSQLiteContext } from "expo-sqlite";
 import { getAllHabits, toggleDoneToday } from "@/db";
 import type { Habit } from "@/types/habit";
@@ -20,7 +20,6 @@ export default function HomePage() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // ←←← DÙNG useFocusEffect ĐỂ TỰ ĐỘNG LOAD LẠI KHI VÀO MÀN HÌNH ←←←
   useFocusEffect(
     useCallback(() => {
       const loadData = async () => {
