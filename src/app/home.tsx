@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { useFocusEffect } from "expo-router"; 
+import { useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { getAllHabits, toggleDoneToday } from "@/db";
 import type { Habit } from "@/types/habit";
@@ -75,35 +75,63 @@ export default function HomePage() {
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
+          // Chỉ thay phần renderItem trong FlatList của home.tsx
+
           renderItem={({ item }) => (
-            <View className="bg-white border border-gray-200 rounded-xl p-5 mb-4 shadow-sm">
-              <Text
-                className={`text-xl font-bold ${
-                  item.done_today === 1 ? "line-through text-gray-400" : "text-gray-900"
-                }`}
-              >
-                {item.title}
-              </Text>
+            <TouchableOpacity
+              onLongPress={() => router.push(`/form?id=${item.id}`)} // Nhấn lâu → mở form sửa
+              delayLongPress={500}
+              activeOpacity={0.7}
+            >
+              <View className={`bg-white border-2 rounded-xl p-5 mb-4 shadow-sm ${item.done_today === 1 ? "border-emerald-400" : "border-gray-200"
+                }`}>
+                {/* Title + icon hoàn thành */}
+                <View className="flex-row items-center justify-between">
+                  <Text
+                    className={`text-xl font-bold flex-1 mr-3 ${item.done_today === 1 ? "line-through text-gray-400" : "text-gray-900"
+                      }`}
+                  >
+                    {item.title}
+                  </Text>
 
-              {item.description ? (
-                <Text className="text-gray-600 mt-2 text-base">
-                  {item.description}
-                </Text>
-              ) : null}
+                  {/* Nút SỬA rõ ràng */}
+                  <TouchableOpacity
+                    onPress={() => router.push(`/form?id=${item.id}`)}
+                    className="bg-blue-100 p-2 rounded-lg"
+                  >
+                    <MaterialIcons name="edit" size={22} color="#2563eb" />
+                  </TouchableOpacity>
+                </View>
 
-              <View className="flex-row items-center mt-4 gap-3">
-                <TouchableOpacity onPress={() => handleToggle(item.id, item.done_today)}>
+                {/* Description */}
+                {item.description ? (
+                  <Text className="text-gray-600 mt-2 text-base">{item.description}</Text>
+                ) : null}
+
+                {/* Toggle hoàn thành */}
+                <TouchableOpacity
+                  onPress={() => handleToggle(item.id, item.done_today)}
+                  className={`mt-4 px-5 py-3 rounded-full flex-row items-center gap-3 self-start ${item.done_today === 1
+                      ? "bg-emerald-100 border-2 border-emerald-500"
+                      : "bg-gray-100 border-2 border-gray-300"
+                    }`}
+                >
                   {item.done_today === 1 ? (
-                    <Ionicons name="checkmark-circle" size={36} color="#10b981" />
+                    <Ionicons name="checkmark-circle" size={32} color="#10b981" />
                   ) : (
-                    <Ionicons name="checkmark-circle-outline" size={36} color="#94a3b8" />
+                    <Ionicons name="checkmark-circle-outline" size={32} color="#94a3b8" />
                   )}
+                  <Text className={`font-semibold ${item.done_today === 1 ? "text-emerald-700" : "text-gray-600"}`}>
+                    {item.done_today === 1 ? "Hoàn thành hôm nay!" : "Chưa làm hôm nay"}
+                  </Text>
                 </TouchableOpacity>
-                <Text className={`font-medium ${item.done_today === 1 ? "text-emerald-600" : "text-gray-500"}`}>
-                  {item.done_today === 1 ? "Đã hoàn thành hôm nay" : "Chưa làm hôm nay"}
+
+                {/* Gợi ý nhấn lâu */}
+                <Text className="text-xs text-gray-400 mt-3 text-right">
+                  Nhấn giữ để sửa nhanh
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}
